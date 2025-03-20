@@ -1,18 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'screens/home_screen.dart';
+import 'services/tts_service.dart';
+import 'models/app_state.dart';
+import 'theme/app_theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(LanguageLearningApp());
+/// Helper class to convert deprecated text theme properties to current ones
+class TextThemeHelper {
+  /// Replacement for Theme.of(context).textTheme.caption?.color
+  static Color? captionColor(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall?.color;
+  }
+  
+  /// Replacement for Theme.of(context).textTheme.bodyText1?.color
+  static Color? bodyText1Color(BuildContext context) {
+    return Theme.of(context).textTheme.bodyLarge?.color;
+  }
+  
+  /// Replacement for Theme.of(context).textTheme.bodyText2?.color
+  static Color? bodyText2Color(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium?.color;
+  }
+  
+  /// Replacement for Theme.of(context).errorColor
+  static Color errorColor(BuildContext context) {
+    return Theme.of(context).colorScheme.error;
+  }
 }
 
-class LanguageLearningApp extends StatefulWidget {
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppState()),
+        Provider(create: (context) => TtsService()),
+      ],
+      child: LanguageLearningApp(),
+    ),
+  );
+}
+
+class LanguageLearningApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Language Mastery',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: HomeScreen(),
+    );
+  }
+}
+
+class LegacyLanguageLearningApp extends StatefulWidget {
   @override
   _LanguageLearningAppState createState() => _LanguageLearningAppState();
 }
 
-class _LanguageLearningAppState extends State<LanguageLearningApp> {
+class _LanguageLearningAppState extends State<LegacyLanguageLearningApp> {
   bool isDarkMode = false;
   String selectedLanguage = 'Spanish';
   int currentPage = 0;
